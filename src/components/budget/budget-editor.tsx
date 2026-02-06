@@ -45,10 +45,7 @@ export function BudgetEditor({ projectId }: BudgetEditorProps) {
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <SummaryCard
-          label="Total Budget"
-          value={formatCents(budget.totalAmountCents)}
-        />
+        <SummaryCard label="Total Budget" value={formatCents(budget.totalAmountCents)} />
         <SummaryCard
           label="Allocated"
           value={formatCents(budget.summary.totalAllocated)}
@@ -75,9 +72,10 @@ export function BudgetEditor({ projectId }: BudgetEditorProps) {
         <CardContent className="pt-6">
           <div className="h-3 bg-parchment rounded-full overflow-hidden flex">
             {budget.categories.map((cat) => {
-              const width = budget.totalAmountCents > 0
-                ? (cat.allocatedCents / budget.totalAmountCents) * 100
-                : 0;
+              const width =
+                budget.totalAmountCents > 0
+                  ? (cat.allocatedCents / budget.totalAmountCents) * 100
+                  : 0;
               return (
                 <div
                   key={cat.id}
@@ -105,11 +103,19 @@ export function BudgetEditor({ projectId }: BudgetEditorProps) {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-stone/10">
-                  <th className="text-left text-label text-slate px-3 py-2 font-medium">Category</th>
-                  <th className="text-right text-label text-slate px-3 py-2 font-medium">Allocated</th>
+                  <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                    Category
+                  </th>
+                  <th className="text-right text-label text-slate px-3 py-2 font-medium">
+                    Allocated
+                  </th>
                   <th className="text-right text-label text-slate px-3 py-2 font-medium">Spent</th>
-                  <th className="text-right text-label text-slate px-3 py-2 font-medium">Remaining</th>
-                  <th className="text-right text-label text-slate px-3 py-2 font-medium">Variance</th>
+                  <th className="text-right text-label text-slate px-3 py-2 font-medium">
+                    Remaining
+                  </th>
+                  <th className="text-right text-label text-slate px-3 py-2 font-medium">
+                    Variance
+                  </th>
                   <th className="w-10" />
                 </tr>
               </thead>
@@ -147,7 +153,7 @@ function CreateBudgetForm({ projectId }: { projectId: string }) {
     try {
       totalCents = parseDollarsToCents(amount);
     } catch {
-      setError("Enter a valid dollar amount.");
+      setError("Enter a valid amount.");
       return;
     }
 
@@ -174,23 +180,16 @@ function CreateBudgetForm({ projectId }: { projectId: string }) {
           description="Set a total budget and categories will be auto-allocated from a template based on the project type."
         />
         <div className="max-w-sm mx-auto mt-6 space-y-4">
-          {error && (
-            <p className="text-sm text-error text-center">{error}</p>
-          )}
+          {error && <p className="text-sm text-error text-center">{error}</p>}
           <Input
-            label="Total Budget (USD)"
+            label="Total Budget (KSh)"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="e.g., 50000"
             type="text"
             inputMode="decimal"
           />
-          <Button
-            variant="accent"
-            className="w-full"
-            loading={isPending}
-            onClick={handleCreate}
-          >
+          <Button variant="accent" className="w-full" loading={isPending} onClick={handleCreate}>
             Create Budget
           </Button>
         </div>
@@ -228,21 +227,15 @@ function SummaryCard({
   );
 }
 
-function CategoryRow({
-  category,
-  budgetTotal,
-}: {
-  category: BudgetCategory;
-  budgetTotal: number;
-}) {
+function CategoryRow({ category, budgetTotal }: { category: BudgetCategory; budgetTotal: number }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const percentage = budgetTotal > 0
-    ? ((category.allocatedCents / budgetTotal) * 100).toFixed(1)
-    : "0.0";
-  const spentPct = category.allocatedCents > 0
-    ? ((category.spentCents / category.allocatedCents) * 100).toFixed(0)
-    : "0";
+  const percentage =
+    budgetTotal > 0 ? ((category.allocatedCents / budgetTotal) * 100).toFixed(1) : "0.0";
+  const spentPct =
+    category.allocatedCents > 0
+      ? ((category.spentCents / category.allocatedCents) * 100).toFixed(0)
+      : "0";
 
   function handleDelete() {
     if (!window.confirm(`Delete category "${category.name}"?`)) return;
@@ -253,10 +246,12 @@ function CategoryRow({
   }
 
   return (
-    <tr className={cn(
-      "border-b border-stone/5 hover:bg-linen/50 transition-colors",
-      isPending && "opacity-60",
-    )}>
+    <tr
+      className={cn(
+        "border-b border-stone/5 hover:bg-linen/50 transition-colors",
+        isPending && "opacity-60",
+      )}
+    >
       <td className="px-3 py-3">
         <div>
           <span className="text-sm text-ink font-medium">{category.name}</span>
@@ -272,25 +267,28 @@ function CategoryRow({
         </div>
       </td>
       <td className="px-3 py-3 text-right">
-        <span className="text-sm font-mono text-ink">
-          {formatCents(category.allocatedCents)}
-        </span>
+        <span className="text-sm font-mono text-ink">{formatCents(category.allocatedCents)}</span>
         <span className="text-xs text-stone ml-1">({percentage}%)</span>
       </td>
       <td className="px-3 py-3 text-right text-sm font-mono text-slate">
         {formatCents(category.spentCents)}
       </td>
-      <td className={cn(
-        "px-3 py-3 text-right text-sm font-mono",
-        category.isOverBudget ? "text-error" : "text-ink",
-      )}>
+      <td
+        className={cn(
+          "px-3 py-3 text-right text-sm font-mono",
+          category.isOverBudget ? "text-error" : "text-ink",
+        )}
+      >
         {formatCents(category.remainingCents)}
       </td>
-      <td className={cn(
-        "px-3 py-3 text-right text-sm font-mono",
-        category.isOverBudget ? "text-error" : "text-sage-600",
-      )}>
-        {category.isOverBudget ? "-" : ""}{spentPct}%
+      <td
+        className={cn(
+          "px-3 py-3 text-right text-sm font-mono",
+          category.isOverBudget ? "text-error" : "text-sage-600",
+        )}
+      >
+        {category.isOverBudget ? "-" : ""}
+        {spentPct}%
       </td>
       <td className="px-3 py-3">
         <button

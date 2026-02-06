@@ -8,18 +8,31 @@ interface ProjectFiltersProps {
   search: string;
   status: string;
   type: string;
+  sortBy?: string;
   onSearchChange: (value: string) => void;
   onStatusChange: (value: string) => void;
   onTypeChange: (value: string) => void;
+  onSortChange?: (value: string) => void;
 }
+
+const SORT_OPTIONS = [
+  { label: "Newest First", value: "createdAt:desc" },
+  { label: "Oldest First", value: "createdAt:asc" },
+  { label: "Recently Updated", value: "updatedAt:desc" },
+  { label: "Name (A-Z)", value: "name:asc" },
+  { label: "Name (Z-A)", value: "name:desc" },
+  { label: "Status", value: "status:asc" },
+];
 
 export function ProjectFilters({
   search,
   status,
   type,
+  sortBy,
   onSearchChange,
   onStatusChange,
   onTypeChange,
+  onSortChange,
 }: ProjectFiltersProps) {
   const hasFilters = search || status || type;
 
@@ -81,6 +94,26 @@ export function ProjectFilters({
           </option>
         ))}
       </select>
+
+      {onSortChange && (
+        <select
+          value={sortBy ?? "createdAt:desc"}
+          onChange={(e) => onSortChange(e.target.value)}
+          className={cn(
+            "px-4 py-2.5 rounded-xl",
+            "bg-paper border border-stone/20",
+            "text-sm text-ink",
+            "focus:outline-none focus:border-terracotta-300 focus:ring-2 focus:ring-terracotta-100",
+            "transition-all duration-150",
+          )}
+        >
+          {SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      )}
 
       {hasFilters && (
         <button

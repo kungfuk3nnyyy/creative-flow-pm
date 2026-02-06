@@ -2,7 +2,7 @@
 
 import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Trash2, Ban } from "lucide-react";
+import { Send, Trash2, Ban, Download } from "lucide-react";
 import {
   sendInvoiceAction,
   deleteInvoiceAction,
@@ -16,11 +16,7 @@ interface InvoiceActionsProps {
   isAdmin: boolean;
 }
 
-export function InvoiceActions({
-  invoiceId,
-  status,
-  isAdmin,
-}: InvoiceActionsProps) {
+export function InvoiceActions({ invoiceId, status, isAdmin }: InvoiceActionsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -65,35 +61,30 @@ export function InvoiceActions({
       {error && <p className="text-xs text-error">{error}</p>}
 
       <div className="flex items-center gap-2">
+        <a
+          href={`/api/invoices/${invoiceId}/pdf`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-paper border border-stone/20 text-ink hover:bg-linen transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" />
+          PDF
+        </a>
+
         {status === "DRAFT" && (
           <>
-            <Button
-              size="sm"
-              variant="accent"
-              loading={isPending}
-              onClick={handleSend}
-            >
+            <Button size="sm" variant="accent" loading={isPending} onClick={handleSend}>
               <Send className="w-3.5 h-3.5" />
               Send
             </Button>
-            <Button
-              size="sm"
-              variant="danger"
-              loading={isPending}
-              onClick={handleDelete}
-            >
+            <Button size="sm" variant="danger" loading={isPending} onClick={handleDelete}>
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </>
         )}
 
         {status === "OVERDUE" && isAdmin && (
-          <Button
-            size="sm"
-            variant="ghost"
-            loading={isPending}
-            onClick={handleWriteOff}
-          >
+          <Button size="sm" variant="ghost" loading={isPending} onClick={handleWriteOff}>
             <Ban className="w-3.5 h-3.5" />
             Write Off
           </Button>

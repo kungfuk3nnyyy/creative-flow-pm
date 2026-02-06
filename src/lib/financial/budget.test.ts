@@ -30,20 +30,14 @@ describe("allocateFromTemplate", () => {
   });
 
   it("handles single-cent budget", () => {
-    const result = allocateFromTemplate(
-      cents(1),
-      BUDGET_TEMPLATES.OTHER.categories,
-    );
+    const result = allocateFromTemplate(cents(1), BUDGET_TEMPLATES.OTHER.categories);
 
     const sum = result.reduce((s, r) => s + r.allocatedCents, 0);
     expect(sum).toBe(1);
   });
 
   it("handles zero budget", () => {
-    const result = allocateFromTemplate(
-      cents(0),
-      BUDGET_TEMPLATES.OTHER.categories,
-    );
+    const result = allocateFromTemplate(cents(0), BUDGET_TEMPLATES.OTHER.categories);
 
     const sum = result.reduce((s, r) => s + r.allocatedCents, 0);
     expect(sum).toBe(0);
@@ -58,18 +52,13 @@ describe("allocateFromTemplate", () => {
     const template = BUDGET_TEMPLATES.CONFERENCE_DECOR;
     const result = allocateFromTemplate(cents(50000), template.categories);
 
-    expect(result.map((r) => r.name)).toEqual(
-      template.categories.map((c) => c.name),
-    );
+    expect(result.map((r) => r.name)).toEqual(template.categories.map((c) => c.name));
   });
 
   it("allocates correctly for all project type templates", () => {
     for (const [key, template] of Object.entries(BUDGET_TEMPLATES)) {
       // Verify template basis points sum to 10000
-      const totalBp = template.categories.reduce(
-        (s, c) => s + c.allocationBasisPoints,
-        0,
-      );
+      const totalBp = template.categories.reduce((s, c) => s + c.allocationBasisPoints, 0);
       expect(totalBp).toBe(10000);
 
       // Verify allocation sums exactly
@@ -129,21 +118,21 @@ describe("calculateVariance", () => {
 
 describe("formatCents", () => {
   it("formats positive amounts", () => {
-    expect(formatCents(150075)).toBe("$1,500.75");
-    expect(formatCents(100)).toBe("$1.00");
-    expect(formatCents(1)).toBe("$0.01");
+    expect(formatCents(150075)).toBe("Ksh\u00a01,500.75");
+    expect(formatCents(100)).toBe("Ksh\u00a01.00");
+    expect(formatCents(1)).toBe("Ksh\u00a00.01");
   });
 
   it("formats zero", () => {
-    expect(formatCents(0)).toBe("$0.00");
+    expect(formatCents(0)).toBe("Ksh\u00a00.00");
   });
 
   it("formats negative amounts", () => {
-    expect(formatCents(-500)).toBe("-$5.00");
+    expect(formatCents(-500)).toBe("-Ksh\u00a05.00");
   });
 
   it("formats large amounts with commas", () => {
-    expect(formatCents(10000000)).toBe("$100,000.00");
+    expect(formatCents(10000000)).toBe("Ksh\u00a0100,000.00");
   });
 });
 
@@ -153,9 +142,11 @@ describe("parseDollarsToCents", () => {
     expect(parseDollarsToCents("1500.75")).toBe(150075);
   });
 
-  it("strips dollar signs and commas", () => {
+  it("strips currency symbols and commas", () => {
     expect(parseDollarsToCents("$1,500.75")).toBe(150075);
     expect(parseDollarsToCents("$100")).toBe(10000);
+    expect(parseDollarsToCents("Ksh 1,500.75")).toBe(150075);
+    expect(parseDollarsToCents("KSh 100")).toBe(10000);
   });
 
   it("rounds half up", () => {

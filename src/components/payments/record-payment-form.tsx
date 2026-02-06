@@ -30,9 +30,7 @@ export function RecordPaymentForm({
   const [error, setError] = useState<string | null>(null);
 
   const [amount, setAmount] = useState("");
-  const [paymentDate, setPaymentDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split("T")[0]);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [reference, setReference] = useState("");
   const [notes, setNotes] = useState("");
@@ -49,7 +47,7 @@ export function RecordPaymentForm({
     try {
       amountCents = parseDollarsToCents(amount);
     } catch {
-      setError("Enter a valid dollar amount.");
+      setError("Enter a valid amount.");
       return;
     }
 
@@ -59,9 +57,7 @@ export function RecordPaymentForm({
     }
 
     if (amountCents > balanceDueCents) {
-      setError(
-        `Payment cannot exceed the outstanding balance of ${formatCents(balanceDueCents)}.`,
-      );
+      setError(`Payment cannot exceed the outstanding balance of ${formatCents(balanceDueCents)}.`);
       return;
     }
 
@@ -87,21 +83,15 @@ export function RecordPaymentForm({
   return (
     <div className="space-y-4 rounded-xl border border-stone/10 bg-paper p-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-ink">
-          Record Payment for {invoiceNumber}
-        </h4>
-        <span className="text-xs text-slate">
-          Balance: {formatCents(balanceDueCents)}
-        </span>
+        <h4 className="text-sm font-medium text-ink">Record Payment for {invoiceNumber}</h4>
+        <span className="text-xs text-slate">Balance: {formatCents(balanceDueCents)}</span>
       </div>
 
-      {error && (
-        <p className="text-sm text-error text-center">{error}</p>
-      )}
+      {error && <p className="text-sm text-error text-center">{error}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Input
-          label="Amount (USD)"
+          label="Amount (KSh)"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder={`Max: ${formatCents(balanceDueCents)}`}
@@ -118,10 +108,7 @@ export function RecordPaymentForm({
           label="Method"
           value={paymentMethod}
           onChange={(e) => setPaymentMethod(e.target.value)}
-          options={[
-            { label: "Select method...", value: "" },
-            ...PAYMENT_METHOD_OPTIONS,
-          ]}
+          options={[{ label: "Select method...", value: "" }, ...PAYMENT_METHOD_OPTIONS]}
         />
       </div>
 
@@ -141,12 +128,7 @@ export function RecordPaymentForm({
       </div>
 
       <div className="flex items-center gap-3">
-        <Button
-          variant="primary"
-          size="sm"
-          loading={isPending}
-          onClick={handleSubmit}
-        >
+        <Button variant="primary" size="sm" loading={isPending} onClick={handleSubmit}>
           Record Payment
         </Button>
         {onCancel && (

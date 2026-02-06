@@ -63,7 +63,7 @@ export function ExpenseForm({
     try {
       amountCents = parseDollarsToCents(amount);
     } catch {
-      setError("Enter a valid dollar amount.");
+      setError("Enter a valid amount.");
       return;
     }
 
@@ -99,9 +99,7 @@ export function ExpenseForm({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {error && (
-            <p className="text-sm text-error text-center">{error}</p>
-          )}
+          {error && <p className="text-sm text-error text-center">{error}</p>}
 
           <Input
             label="Description"
@@ -112,7 +110,7 @@ export function ExpenseForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label="Amount (USD)"
+              label="Amount (KSh)"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="e.g., 250.00"
@@ -157,11 +155,7 @@ export function ExpenseForm({
           />
 
           <div className="flex items-center gap-3 pt-2">
-            <Button
-              variant="accent"
-              loading={isPending}
-              onClick={handleSubmit}
-            >
+            <Button variant="accent" loading={isPending} onClick={handleSubmit}>
               Create Expense
             </Button>
             {onCancel && (

@@ -5,6 +5,14 @@ import { logoutAction } from "@/actions/auth.actions";
 import { cn } from "@/lib/utils";
 import { LogOut, User } from "lucide-react";
 
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Admin",
+  MANAGER: "Manager",
+  FINANCE: "Finance",
+  MEMBER: "Member",
+  VIEWER: "Viewer",
+};
+
 interface UserMenuProps {
   collapsed?: boolean;
 }
@@ -47,10 +55,10 @@ export function UserMenu({ collapsed = false }: UserMenuProps) {
       {!collapsed && (
         <>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-ink truncate">
-              {session.user.name}
+            <p className="text-sm font-medium text-ink truncate">{session.user.name}</p>
+            <p className="text-xs text-stone truncate">
+              {ROLE_LABELS[(session.user as { role?: string }).role ?? ""] ?? session.user.email}
             </p>
-            <p className="text-xs text-stone truncate">{session.user.email}</p>
           </div>
 
           <form action={logoutAction}>

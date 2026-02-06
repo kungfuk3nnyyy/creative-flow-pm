@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, AuthError } from "@/lib/auth-utils";
 import { logActivity } from "@/lib/activity";
 import { createFinancialAuditLog } from "@/lib/services/audit.service";
-import {
-  createInvoiceSchema,
-  updateInvoiceSchema,
-} from "@/lib/validations/invoice";
+import { sendEmail } from "@/lib/email/send";
+import { invoiceSentSubject, invoiceSentHtml } from "@/lib/email/templates/invoice-sent";
+import { formatMoney, formatDate } from "@/lib/utils";
+import { createInvoiceSchema, updateInvoiceSchema } from "@/lib/validations/invoice";
 import {
   calculateInvoiceTotals,
   generateInvoiceNumber,
@@ -27,23 +27,21 @@ type ActionResult = {
  * Server recalculates all totals from line items (client totals ignored).
  * Requires MANAGER or FINANCE role.
  */
-export async function createInvoiceAction(
-  input: {
-    projectId: string;
-    clientName: string;
-    clientEmail?: string;
-    clientAddress?: string;
-    issueDate: Date;
-    paymentTerms?: string;
-    taxRateBasisPoints?: number;
-    notes?: string;
-    lineItems: {
-      description: string;
-      quantityThousandths: number;
-      unitPriceCents: number;
-    }[];
-  },
-): Promise<ActionResult> {
+export async function createInvoiceAction(input: {
+  projectId: string;
+  clientName: string;
+  clientEmail?: string;
+  clientAddress?: string;
+  issueDate: Date;
+  paymentTerms?: string;
+  taxRateBasisPoints?: number;
+  notes?: string;
+  lineItems: {
+    description: string;
+    quantityThousandths: number;
+    unitPriceCents: number;
+  }[];
+}): Promise<ActionResult> {
   let user;
   try {
     user = await requireRole(UserRole.MANAGER);
@@ -75,10 +73,7 @@ export async function createInvoiceAction(
   }
 
   // Server recalculates totals
-  const totals = calculateInvoiceTotals(
-    parsed.data.lineItems,
-    parsed.data.taxRateBasisPoints,
-  );
+  const totals = calculateInvoiceTotals(parsed.data.lineItems, parsed.data.taxRateBasisPoints);
 
   // Generate invoice number
   const now = new Date();
@@ -95,10 +90,7 @@ export async function createInvoiceAction(
   const invoiceNumber = generateInvoiceNumber(yearMonth, existingCount + 1);
 
   // Calculate due date from payment terms
-  const dueDate = calculateDueDate(
-    parsed.data.issueDate,
-    parsed.data.paymentTerms,
-  );
+  const dueDate = calculateDueDate(parsed.data.issueDate, parsed.data.paymentTerms);
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -169,22 +161,20 @@ export async function createInvoiceAction(
  * Recalculates totals from line items if provided.
  * Requires MANAGER or FINANCE role.
  */
-export async function updateInvoiceAction(
-  input: {
-    invoiceId: string;
-    clientName?: string;
-    clientEmail?: string | null;
-    clientAddress?: string | null;
-    paymentTerms?: string;
-    taxRateBasisPoints?: number;
-    notes?: string | null;
-    lineItems?: {
-      description: string;
-      quantityThousandths: number;
-      unitPriceCents: number;
-    }[];
-  },
-): Promise<ActionResult> {
+export async function updateInvoiceAction(input: {
+  invoiceId: string;
+  clientName?: string;
+  clientEmail?: string | null;
+  clientAddress?: string | null;
+  paymentTerms?: string;
+  taxRateBasisPoints?: number;
+  notes?: string | null;
+  lineItems?: {
+    description: string;
+    quantityThousandths: number;
+    unitPriceCents: number;
+  }[];
+}): Promise<ActionResult> {
   let user;
   try {
     user = await requireRole(UserRole.MANAGER);
@@ -308,9 +298,7 @@ export async function updateInvoiceAction(
  * Send an invoice (transition DRAFT -> SENT).
  * Requires MANAGER or FINANCE role.
  */
-export async function sendInvoiceAction(
-  invoiceId: string,
-): Promise<ActionResult> {
+export async function sendInvoiceAction(invoiceId: string): Promise<ActionResult> {
   let user;
   try {
     user = await requireRole(UserRole.MANAGER);
@@ -373,6 +361,28 @@ export async function sendInvoiceAction(
     },
   });
 
+  // Send email notification if client has an email
+  if (invoice.clientEmail) {
+    const org = await prisma.organization.findUniqueOrThrow({
+      where: { id: user.organizationId },
+      select: { name: true },
+    });
+
+    const emailData = {
+      clientName: invoice.clientName,
+      invoiceNumber: invoice.invoiceNumber,
+      totalFormatted: formatMoney(invoice.totalCents),
+      dueDate: formatDate(invoice.dueDate),
+      orgName: org.name,
+    };
+
+    sendEmail({
+      to: invoice.clientEmail,
+      subject: invoiceSentSubject(emailData),
+      html: invoiceSentHtml(emailData),
+    }).catch((err) => console.error("[invoice.sent] Email failed:", err));
+  }
+
   revalidatePath(`/projects/${invoice.project.id}/invoices`);
 
   return { success: true };
@@ -383,9 +393,7 @@ export async function sendInvoiceAction(
  * Only for OVERDUE invoices.
  * Requires ADMIN role.
  */
-export async function writeOffInvoiceAction(
-  invoiceId: string,
-): Promise<ActionResult> {
+export async function writeOffInvoiceAction(invoiceId: string): Promise<ActionResult> {
   let user;
   try {
     user = await requireRole(UserRole.ADMIN);
@@ -445,9 +453,7 @@ export async function writeOffInvoiceAction(
  * Only DRAFT invoices can be deleted.
  * Requires MANAGER or FINANCE role.
  */
-export async function deleteInvoiceAction(
-  invoiceId: string,
-): Promise<ActionResult> {
+export async function deleteInvoiceAction(invoiceId: string): Promise<ActionResult> {
   let user;
   try {
     user = await requireRole(UserRole.MANAGER);

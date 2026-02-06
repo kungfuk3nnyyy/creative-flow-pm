@@ -65,6 +65,86 @@ export function ProfitabilityTable() {
         </div>
       )}
 
+      {/* Visual Comparison */}
+      {projects.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue vs Expenses by Project</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {/* Legend */}
+              <div className="flex items-center gap-4 mb-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm bg-terracotta-500" />
+                  <span className="text-xs text-slate">Revenue</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded-sm bg-stone/40" />
+                  <span className="text-xs text-slate">Expenses</span>
+                </div>
+              </div>
+              {(() => {
+                const maxVal = Math.max(
+                  ...projects.map((p) =>
+                    Math.max(p.invoicedCents as number, p.expensesCents as number),
+                  ),
+                  1,
+                );
+                return projects.map((project) => {
+                  const revPct = ((project.invoicedCents as number) / maxVal) * 100;
+                  const expPct = ((project.expensesCents as number) / maxVal) * 100;
+                  return (
+                    <div key={project.projectId} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="text-sm text-ink font-medium truncate max-w-[200px]"
+                          title={project.projectName}
+                        >
+                          {project.projectName}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-xs font-mono font-medium",
+                            (project.profitCents as number) >= 0 ? "text-success" : "text-error",
+                          )}
+                        >
+                          {formatBasisPoints(project.marginBasisPoints as BasisPoints)} margin
+                        </span>
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-3 bg-stone/5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-terracotta-500 rounded-full transition-all"
+                              style={{ width: `${Math.max(1, revPct)}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-mono text-slate w-24 text-right">
+                            {formatCents(project.invoicedCents as number)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-3 bg-stone/5 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-stone/40 rounded-full transition-all"
+                              style={{ width: `${Math.max(1, expPct)}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-mono text-slate w-24 text-right">
+                            {formatCents(project.expensesCents as number)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Table */}
       <Card>
         <CardHeader>
@@ -72,9 +152,7 @@ export function ProfitabilityTable() {
         </CardHeader>
         <CardContent>
           {projects.length === 0 ? (
-            <p className="text-sm text-slate text-center py-8">
-              No project data available.
-            </p>
+            <p className="text-sm text-slate text-center py-8">No project data available.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -83,9 +161,7 @@ export function ProfitabilityTable() {
                     <th className="text-left text-label text-slate px-3 py-2 font-medium">
                       Project
                     </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Type
-                    </th>
+                    <th className="text-left text-label text-slate px-3 py-2 font-medium">Type</th>
                     <th className="text-center text-label text-slate px-3 py-2 font-medium">
                       Status
                     </th>
@@ -173,7 +249,9 @@ export function ProfitabilityTable() {
                               />
                             </div>
                             <span className="text-xs font-mono text-slate">
-                              {formatBasisPoints(project.budgetUtilizationBasisPoints as BasisPoints)}
+                              {formatBasisPoints(
+                                project.budgetUtilizationBasisPoints as BasisPoints,
+                              )}
                             </span>
                           </div>
                         ) : (

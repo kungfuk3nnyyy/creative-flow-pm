@@ -149,12 +149,67 @@ export function PnlReport() {
             />
           </div>
 
+          {/* Visual Summary */}
+          {(() => {
+            const revCents =
+              basis === "accrual"
+                ? (report.revenue.invoicedCents as number)
+                : (report.revenue.receivedCents as number);
+            const expCents = report.expenses.approvedCents as number;
+            const maxVal = Math.max(revCents, expCents, 1);
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Revenue vs Expenses</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate">Revenue</span>
+                      <span className="font-mono text-ink">{formatCents(revCents)}</span>
+                    </div>
+                    <div className="w-full h-6 bg-stone/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-success rounded-full transition-all"
+                        style={{ width: `${Math.max(2, (revCents / maxVal) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate">Expenses</span>
+                      <span className="font-mono text-ink">{formatCents(expCents)}</span>
+                    </div>
+                    <div className="w-full h-6 bg-stone/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-terracotta-400 rounded-full transition-all"
+                        style={{ width: `${Math.max(2, (expCents / maxVal) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-stone/10">
+                    <span className="text-sm font-medium text-ink">Gross Profit</span>
+                    <span
+                      className={cn(
+                        "text-sm font-mono font-semibold",
+                        (report.grossProfitCents as number) >= 0 ? "text-success" : "text-error",
+                      )}
+                    >
+                      {formatCents(report.grossProfitCents as number)}{" "}
+                      <span className="text-xs text-slate font-normal">
+                        ({formatBasisPoints(report.grossMarginBasisPoints as BasisPoints)} margin)
+                      </span>
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })()}
+
           {/* P&L Statement */}
           <Card>
             <CardHeader>
-              <CardTitle>
-                Profit & Loss Statement
-              </CardTitle>
+              <CardTitle>Profit & Loss Statement</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
@@ -190,9 +245,7 @@ export function PnlReport() {
                 {/* Gross Profit */}
                 <div className="border-t-2 border-stone/20 mt-4 pt-3">
                   <div className="flex items-center justify-between px-3 py-2">
-                    <span className="text-sm font-semibold text-ink">
-                      Gross Profit
-                    </span>
+                    <span className="text-sm font-semibold text-ink">Gross Profit</span>
                     <span
                       className={cn(
                         "text-sm font-mono font-semibold",
@@ -284,14 +337,9 @@ function PnlSection({
       {expanded && items.length > 0 && (
         <div className="ml-6 space-y-0.5">
           {items.map((item) => (
-            <div
-              key={item.label}
-              className="flex items-center justify-between px-3 py-1.5"
-            >
+            <div key={item.label} className="flex items-center justify-between px-3 py-1.5">
               <span className="text-sm text-slate">{item.label}</span>
-              <span className="text-sm font-mono text-slate">
-                {formatCents(item.amountCents)}
-              </span>
+              <span className="text-sm font-mono text-slate">{formatCents(item.amountCents)}</span>
             </div>
           ))}
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-stone/10">

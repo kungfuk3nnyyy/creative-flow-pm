@@ -7,17 +7,17 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Format cents as a dollar string.
- * Example: 15099 -> "$150.99"
+ * Format cents as a KES currency string.
+ * Example: 15099 -> "KSh 15,099.00" (values are in cents)
  */
 export function formatMoney(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
+  const major = cents / 100;
+  return new Intl.NumberFormat("en-KE", {
     style: "currency",
-    currency: "USD",
+    currency: "KES",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(dollars);
+  }).format(major);
 }
 
 /**

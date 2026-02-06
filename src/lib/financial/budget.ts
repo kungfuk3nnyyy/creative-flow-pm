@@ -15,16 +15,11 @@ export function allocateFromTemplate(
 ): { name: string; allocatedCents: Cents }[] {
   if (categories.length === 0) return [];
 
-  const totalBasisPoints = categories.reduce(
-    (sum, cat) => sum + cat.allocationBasisPoints,
-    0,
-  );
+  const totalBasisPoints = categories.reduce((sum, cat) => sum + cat.allocationBasisPoints, 0);
 
   // Calculate exact allocations using Decimal.js
   const exactAllocations = categories.map((cat) => {
-    const exact = new Decimal(totalCents)
-      .mul(cat.allocationBasisPoints)
-      .div(totalBasisPoints);
+    const exact = new Decimal(totalCents).mul(cat.allocationBasisPoints).div(totalBasisPoints);
     const floored = exact.floor().toNumber();
     const remainder = exact.minus(floored).toNumber();
 
@@ -36,16 +31,11 @@ export function allocateFromTemplate(
   });
 
   // Distribute remaining cents using largest remainder method
-  const totalFloored = exactAllocations.reduce(
-    (sum, a) => sum + a.floored,
-    0,
-  );
+  const totalFloored = exactAllocations.reduce((sum, a) => sum + a.floored, 0);
   let remaining = totalCents - totalFloored;
 
   // Sort by remainder descending to assign extra cents
-  const sorted = [...exactAllocations].sort(
-    (a, b) => b.remainder - a.remainder,
-  );
+  const sorted = [...exactAllocations].sort((a, b) => b.remainder - a.remainder);
 
   const result = new Map<string, number>();
   for (const alloc of exactAllocations) {
@@ -79,11 +69,7 @@ export function calculateVariance(
   const remaining = allocatedCents - spentCents;
   const variancePercent =
     allocatedCents > 0
-      ? new Decimal(remaining)
-          .div(allocatedCents)
-          .mul(100)
-          .toDecimalPlaces(1)
-          .toNumber()
+      ? new Decimal(remaining).div(allocatedCents).mul(100).toDecimalPlaces(1).toNumber()
       : 0;
 
   return {
@@ -94,16 +80,16 @@ export function calculateVariance(
 }
 
 /**
- * Format cents as a USD currency string.
- * Example: 150075 -> "$1,500.75"
+ * Format cents as a KES currency string.
+ * Example: 150075 -> "KSh 1,500.75"
  */
 export function formatCents(value: number): string {
-  const dollars = value / 100;
-  return new Intl.NumberFormat("en-US", {
+  const major = value / 100;
+  return new Intl.NumberFormat("en-KE", {
     style: "currency",
-    currency: "USD",
+    currency: "KES",
     minimumFractionDigits: 2,
-  }).format(dollars);
+  }).format(major);
 }
 
 /**
@@ -112,7 +98,7 @@ export function formatCents(value: number): string {
  * Example: "1,500" -> 150000
  */
 export function parseDollarsToCents(input: string): Cents {
-  const cleaned = input.replace(/[,$\s]/g, "");
+  const cleaned = input.replace(/Ksh|KSh|[,$\s]/gi, "");
   const dollars = new Decimal(cleaned);
   const result = dollars.mul(100).toDecimalPlaces(0, Decimal.ROUND_HALF_UP);
   return cents(result.toNumber());

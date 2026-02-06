@@ -5,6 +5,7 @@ interface UIState {
   sidebarCollapsed: boolean;
   theme: "light" | "dark";
   commandPaletteOpen: boolean;
+  mobileMenuOpen: boolean;
 
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -12,6 +13,8 @@ interface UIState {
   setTheme: (theme: "light" | "dark") => void;
   openCommandPalette: () => void;
   closeCommandPalette: () => void;
+  toggleMobileMenu: () => void;
+  closeMobileMenu: () => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -20,12 +23,11 @@ export const useUIStore = create<UIState>()(
       sidebarCollapsed: false,
       theme: "light",
       commandPaletteOpen: false,
+      mobileMenuOpen: false,
 
-      toggleSidebar: () =>
-        set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+      toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
-      setSidebarCollapsed: (collapsed) =>
-        set({ sidebarCollapsed: collapsed }),
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
 
       toggleTheme: () =>
         set((state) => ({
@@ -37,6 +39,10 @@ export const useUIStore = create<UIState>()(
       openCommandPalette: () => set({ commandPaletteOpen: true }),
 
       closeCommandPalette: () => set({ commandPaletteOpen: false }),
+
+      toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
+
+      closeMobileMenu: () => set({ mobileMenuOpen: false }),
     }),
     {
       name: "creativeflow-ui",

@@ -46,11 +46,41 @@ interface ActivityEntry {
   project: { name: string | null } | null;
 }
 
+interface PendingExpense {
+  id: string;
+  description: string;
+  amountCents: number;
+  project: { id: string; name: string };
+  submittedBy: { name: string };
+}
+
+interface StaleDraftInvoice {
+  id: string;
+  invoiceNumber: string;
+  clientName: string;
+  totalCents: number;
+  project: { id: string; name: string };
+}
+
+interface OverdueTask {
+  id: string;
+  title: string;
+  dueDate: string;
+  milestone: { project: { id: string; name: string } };
+}
+
+interface NeedsAttention {
+  pendingApprovalExpenses: PendingExpense[];
+  staleDraftInvoices: StaleDraftInvoice[];
+  overdueTasks: OverdueTask[];
+}
+
 interface DashboardResponse {
   kpis: DashboardKPIs;
   activeProjects: ActiveProject[];
   overdueInvoices: OverdueInvoice[];
   recentActivity: ActivityEntry[];
+  needsAttention: NeedsAttention;
 }
 
 export function useDashboard() {
@@ -74,4 +104,8 @@ export type {
   ActiveProject,
   OverdueInvoice,
   ActivityEntry,
+  NeedsAttention,
+  PendingExpense,
+  StaleDraftInvoice,
+  OverdueTask,
 };

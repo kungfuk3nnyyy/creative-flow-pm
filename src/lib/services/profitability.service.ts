@@ -19,70 +19,73 @@ export interface ProjectProfitability {
  * Calculate profitability for all projects in an organization,
  * or for a single project.
  */
+export interface ProfitabilityResult {
+  projects: ProjectProfitability[];
+  total: number;
+}
+
 export async function calculateProjectProfitability(params: {
   organizationId: string;
   projectId?: string;
-}): Promise<ProjectProfitability[]> {
-  const { organizationId, projectId } = params;
+  page?: number;
+  pageSize?: number;
+}): Promise<ProfitabilityResult> {
+  const { organizationId, projectId, page = 1, pageSize = 20 } = params;
 
   const where = {
     organizationId,
     ...(projectId ? { id: projectId } : {}),
   };
 
-  const projects = await prisma.project.findMany({
-    where,
-    select: {
-      id: true,
-      name: true,
-      type: true,
-      status: true,
-      budgets: {
-        select: {
-          totalAmountCents: true,
+  const [projects, total] = await Promise.all([
+    prisma.project.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        status: true,
+        budgets: {
+          select: {
+            totalAmountCents: true,
+          },
+          take: 1,
         },
-        take: 1,
-      },
-      invoices: {
-        where: { deletedAt: null, status: { not: "DRAFT" } },
-        select: {
-          totalCents: true,
-          balanceDueCents: true,
-          payments: { select: { amountCents: true } },
+        invoices: {
+          where: { deletedAt: null, status: { not: "DRAFT" } },
+          select: {
+            totalCents: true,
+            balanceDueCents: true,
+            payments: { select: { amountCents: true } },
+          },
+        },
+        expenses: {
+          where: { deletedAt: null, status: "APPROVED" },
+          select: { amountCents: true },
         },
       },
-      expenses: {
-        where: { deletedAt: null, status: "APPROVED" },
-        select: { amountCents: true },
-      },
-    },
-    orderBy: { updatedAt: "desc" },
-  });
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.project.count({ where }),
+  ]);
 
-  return projects.map((project) => {
+  const result = projects.map((project) => {
     const budgetTotal = project.budgets[0]?.totalAmountCents ?? 0;
 
-    const invoicedTotal = project.invoices.reduce(
-      (sum, inv) => sum + inv.totalCents,
-      0,
-    );
+    const invoicedTotal = project.invoices.reduce((sum, inv) => sum + inv.totalCents, 0);
 
     const receivedTotal = project.invoices.reduce(
-      (sum, inv) =>
-        sum + inv.payments.reduce((s, p) => s + p.amountCents, 0),
+      (sum, inv) => sum + inv.payments.reduce((s, p) => s + p.amountCents, 0),
       0,
     );
 
-    const expensesTotal = project.expenses.reduce(
-      (sum, exp) => sum + exp.amountCents,
-      0,
-    );
+    const expensesTotal = project.expenses.reduce((sum, exp) => sum + exp.amountCents, 0);
 
     const profit = invoicedTotal - expensesTotal;
-    const marginBp =
-      invoicedTotal > 0 ? Math.round((profit / invoicedTotal) * 10000) : 0;
-    const budgetUtilBp =
-      budgetTotal > 0 ? Math.round((expensesTotal / budgetTotal) * 10000) : 0;
+    const marginBp = invoicedTotal > 0 ? Math.round((profit / invoicedTotal) * 10000) : 0;
+    const budgetUtilBp = budgetTotal > 0 ? Math.round((expensesTotal / budgetTotal) * 10000) : 0;
 
     return {
       projectId: project.id,
@@ -98,4 +101,6 @@ export async function calculateProjectProfitability(params: {
       budgetUtilizationBasisPoints: budgetUtilBp,
     };
   });
+
+  return { projects: result, total };
 }

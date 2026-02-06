@@ -20,20 +20,20 @@ describe("cn", () => {
 });
 
 describe("formatMoney", () => {
-  it("formats positive cents to USD", () => {
-    expect(formatMoney(15099)).toBe("$150.99");
+  it("formats positive cents to KES", () => {
+    expect(formatMoney(15099)).toBe("Ksh\u00a0150.99");
   });
 
   it("formats zero", () => {
-    expect(formatMoney(0)).toBe("$0.00");
+    expect(formatMoney(0)).toBe("Ksh\u00a00.00");
   });
 
   it("formats large amounts with commas", () => {
-    expect(formatMoney(10000000)).toBe("$100,000.00");
+    expect(formatMoney(10000000)).toBe("Ksh\u00a0100,000.00");
   });
 
   it("formats negative amounts", () => {
-    expect(formatMoney(-500)).toBe("-$5.00");
+    expect(formatMoney(-500)).toBe("-Ksh\u00a05.00");
   });
 });
 

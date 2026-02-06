@@ -38,6 +38,9 @@ export async function GET(request: NextRequest) {
     pendingExpenses,
     recentActivity,
     teamSize,
+    pendingApprovalExpenses,
+    staleDraftInvoices,
+    overdueTasks,
   ] = await Promise.all([
     // Project counts by status
     prisma.project.groupBy({
@@ -167,6 +170,67 @@ export async function GET(request: NextRequest) {
     prisma.user.count({
       where: { organizationId: orgId },
     }),
+
+    // Pending actions: expenses awaiting approval (top 5)
+    prisma.expense.findMany({
+      where: {
+        organizationId: orgId,
+        deletedAt: null,
+        status: "SUBMITTED",
+      },
+      select: {
+        id: true,
+        description: true,
+        amountCents: true,
+        project: { select: { id: true, name: true } },
+        submittedBy: { select: { name: true } },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 5,
+    }),
+
+    // Pending actions: draft invoices older than 3 days
+    prisma.invoice.findMany({
+      where: {
+        organizationId: orgId,
+        deletedAt: null,
+        status: "DRAFT",
+        createdAt: {
+          lt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+        },
+      },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        clientName: true,
+        totalCents: true,
+        project: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 5,
+    }),
+
+    // Pending actions: overdue tasks assigned to current user
+    prisma.task.findMany({
+      where: {
+        milestone: { project: { organizationId: orgId } },
+        assigneeId: user.userId,
+        status: { not: "DONE" },
+        dueDate: { lt: now },
+      },
+      select: {
+        id: true,
+        title: true,
+        dueDate: true,
+        milestone: {
+          select: {
+            project: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { dueDate: "asc" },
+      take: 5,
+    }),
   ]);
 
   // Process project counts
@@ -195,12 +259,9 @@ export async function GET(request: NextRequest) {
       : 0;
 
   // Total outstanding
-  const totalOutstanding = overdueInvoices.reduce(
-    (s, inv) => s + inv.balanceDueCents,
-    0,
-  );
+  const totalOutstanding = overdueInvoices.reduce((s, inv) => s + inv.balanceDueCents, 0);
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     kpis: {
       totalProjects,
       activeProjects: statusMap["ACTIVE"] ?? 0,
@@ -220,5 +281,14 @@ export async function GET(request: NextRequest) {
     activeProjects,
     overdueInvoices,
     recentActivity,
+    needsAttention: {
+      pendingApprovalExpenses,
+      staleDraftInvoices,
+      overdueTasks,
+    },
   });
+
+  response.headers.set("Cache-Control", "private, max-age=60, stale-while-revalidate=120");
+
+  return response;
 }

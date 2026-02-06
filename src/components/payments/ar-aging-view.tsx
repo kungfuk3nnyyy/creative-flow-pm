@@ -1,6 +1,6 @@
 "use client";
 
-import { useArAging, type AgingInvoice } from "@/hooks/use-ar-aging";
+import { useArAging } from "@/hooks/use-ar-aging";
 import { formatCents } from "@/lib/financial/budget";
 import { INVOICE_STATUS_LABELS } from "@/lib/validations/invoice";
 import { StatusBadge, getInvoiceStatusVariant } from "@/components/shared/status-badge";
@@ -12,12 +12,14 @@ interface ArAgingViewProps {
   projectId?: string;
 }
 
-const BUCKET_COLORS = [
-  "bg-success-soft text-success",
-  "bg-info-soft text-info",
-  "bg-warning-soft text-warning",
-  "bg-error-soft/60 text-error",
-  "bg-error-soft text-error",
+const BUCKET_BAR_COLORS = ["bg-success", "bg-info", "bg-warning", "bg-terracotta-500", "bg-error"];
+
+const BUCKET_BORDER_COLORS = [
+  "border-l-success",
+  "border-l-info",
+  "border-l-warning",
+  "border-l-terracotta-500",
+  "border-l-error",
 ];
 
 export function ArAgingView({ projectId }: ArAgingViewProps) {
@@ -42,24 +44,26 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Aging Buckets */}
+      {/* Summary + Aging Buckets */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Accounts Receivable Aging</CardTitle>
-            <div className="text-right">
-              <p className="text-xs text-slate">Total Outstanding</p>
-              <p className="text-lg font-mono font-semibold text-ink">
+        <CardContent className="pt-6">
+          {/* Total Outstanding - prominent display */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+            <div>
+              <p className="text-sm text-slate">Total Outstanding</p>
+              <p className="text-2xl font-mono font-bold text-ink mt-1">
                 {formatCents(totalOutstanding)}
               </p>
             </div>
+            <p className="text-sm text-slate">
+              {invoices.length} outstanding invoice{invoices.length !== 1 ? "s" : ""}
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
+
           {/* Stacked bar */}
           {totalOutstanding > 0 && (
             <div className="mb-6">
-              <div className="flex h-4 rounded-full overflow-hidden">
+              <div className="flex h-8 rounded-xl overflow-hidden gap-0.5">
                 {aging.buckets.map((bucket, i) => {
                   const pct =
                     totalOutstanding > 0
@@ -69,35 +73,75 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
                   return (
                     <div
                       key={bucket.label}
-                      className={cn("transition-all", BUCKET_COLORS[i])}
-                      style={{ width: `${pct}%` }}
+                      className={cn(
+                        "transition-all flex items-center justify-center",
+                        BUCKET_BAR_COLORS[i],
+                      )}
+                      style={{ width: `${Math.max(pct, 3)}%` }}
                       title={`${bucket.label}: ${formatCents(bucket.totalCents as number)} (${pct.toFixed(1)}%)`}
-                    />
+                    >
+                      {pct > 15 && (
+                        <span className="text-[10px] font-medium text-white/90">
+                          {pct.toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
                   );
                 })}
+              </div>
+              {/* Legend - always show all buckets for context */}
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
+                {aging.buckets.map((bucket, i) => (
+                  <div key={bucket.label} className="flex items-center gap-1.5">
+                    <div className={cn("w-2.5 h-2.5 rounded-sm", BUCKET_BAR_COLORS[i])} />
+                    <span
+                      className={cn(
+                        "text-xs",
+                        (bucket.totalCents as number) > 0 ? "text-ink" : "text-stone",
+                      )}
+                    >
+                      {bucket.label}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {/* Bucket cards */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {aging.buckets.map((bucket, i) => (
-              <div
-                key={bucket.label}
-                className={cn(
-                  "rounded-xl p-3 text-center",
-                  BUCKET_COLORS[i]?.split(" ")[0] ?? "bg-linen",
-                )}
-              >
-                <p className="text-xs font-medium text-slate">{bucket.label}</p>
-                <p className="text-sm font-mono font-semibold text-ink mt-1">
-                  {formatCents(bucket.totalCents as number)}
-                </p>
-                <p className="text-[10px] text-stone mt-0.5">
-                  {bucket.invoiceCount} invoice{bucket.invoiceCount !== 1 ? "s" : ""}
-                </p>
-              </div>
-            ))}
+            {aging.buckets.map((bucket, i) => {
+              const hasMoney = (bucket.totalCents as number) > 0;
+              return (
+                <div
+                  key={bucket.label}
+                  className={cn(
+                    "rounded-xl p-4 border-l-4",
+                    BUCKET_BORDER_COLORS[i],
+                    hasMoney ? "bg-linen" : "bg-paper border border-stone/10 opacity-60",
+                  )}
+                >
+                  <p className="text-xs font-medium text-slate">{bucket.label}</p>
+                  <p
+                    className={cn(
+                      "text-base font-mono font-semibold mt-1",
+                      hasMoney ? "text-ink" : "text-stone",
+                    )}
+                  >
+                    {hasMoney ? formatCents(bucket.totalCents as number) : "--"}
+                  </p>
+                  <p className="text-xs text-stone mt-1">
+                    {bucket.invoiceCount} invoice{bucket.invoiceCount !== 1 ? "s" : ""}
+                  </p>
+                  {hasMoney && totalOutstanding > 0 && (
+                    <p className="text-xs text-slate mt-0.5 font-medium">
+                      {(((bucket.totalCents as number) / totalOutstanding) * 100).toFixed(0)}% of
+                      total
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -106,9 +150,10 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
       {invoices.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              Outstanding Invoices ({invoices.length})
-            </CardTitle>
+            <CardTitle>Outstanding Invoices</CardTitle>
+            <span className="text-sm text-slate">
+              {invoices.length} invoice{invoices.length !== 1 ? "s" : ""}
+            </span>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -144,18 +189,18 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
                   {invoices.map((inv) => (
                     <tr
                       key={inv.id}
-                      className="border-b border-stone/5 hover:bg-linen/50 transition-colors"
+                      className={cn(
+                        "border-b border-stone/5 hover:bg-linen/50 transition-colors",
+                        inv.daysOverdue > 90 && "bg-error-soft/20",
+                        inv.daysOverdue > 60 && inv.daysOverdue <= 90 && "bg-terracotta-50/30",
+                      )}
                     >
                       <td className="px-3 py-3 text-sm font-mono font-medium text-ink">
                         {inv.invoiceNumber}
                       </td>
-                      <td className="px-3 py-3 text-sm text-slate">
-                        {inv.clientName}
-                      </td>
+                      <td className="px-3 py-3 text-sm text-slate">{inv.clientName}</td>
                       {!projectId && (
-                        <td className="px-3 py-3 text-sm text-slate">
-                          {inv.project.name}
-                        </td>
+                        <td className="px-3 py-3 text-sm text-slate">{inv.project.name}</td>
                       )}
                       <td className="px-3 py-3 text-sm text-slate">
                         {new Date(inv.dueDate).toLocaleDateString("en-US", {
@@ -164,13 +209,15 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
                           year: "numeric",
                         })}
                       </td>
-                      <td className={cn(
-                        "px-3 py-3 text-sm text-right font-mono",
-                        inv.daysOverdue > 0 ? "text-error font-medium" : "text-slate",
-                      )}>
+                      <td
+                        className={cn(
+                          "px-3 py-3 text-sm text-right font-mono",
+                          inv.daysOverdue > 0 ? "text-error font-medium" : "text-slate",
+                        )}
+                      >
                         {inv.daysOverdue > 0 ? inv.daysOverdue : "--"}
                       </td>
-                      <td className="px-3 py-3 text-sm text-right font-mono text-ink">
+                      <td className="px-3 py-3 text-sm text-right font-mono font-medium text-ink">
                         {formatCents(inv.balanceDueCents)}
                       </td>
                       <td className="px-3 py-3 text-center">

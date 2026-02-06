@@ -18,6 +18,7 @@ export function ProjectsList() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [type, setType] = useState("");
+  const [sort, setSort] = useState("createdAt:desc");
   const [page, setPage] = useState(1);
 
   // Reset page when filters change
@@ -33,11 +34,26 @@ export function ProjectsList() {
     setType(value);
     setPage(1);
   }, []);
+  const handleSortChange = useCallback((value: string) => {
+    setSort(value);
+    setPage(1);
+  }, []);
+
+  const [sortBy, sortOrder] = sort.split(":") as [string, "asc" | "desc"];
 
   const { data, isLoading, error } = useProjects({
     search: search || undefined,
     status: (status as "DRAFT" | "ACTIVE" | "ON_HOLD" | "COMPLETED" | "ARCHIVED") || undefined,
-    type: (type as "INTERIOR_DESIGN" | "CONFERENCE_DECOR" | "EXHIBITION" | "INSTALLATION" | "EXPERIENTIAL" | "OTHER") || undefined,
+    type:
+      (type as
+        | "INTERIOR_DESIGN"
+        | "CONFERENCE_DECOR"
+        | "EXHIBITION"
+        | "INSTALLATION"
+        | "EXPERIENTIAL"
+        | "OTHER") || undefined,
+    sortBy: sortBy as "name" | "createdAt" | "updatedAt" | "startDate" | "status",
+    sortOrder,
     page,
     perPage: 20,
   });
@@ -49,9 +65,11 @@ export function ProjectsList() {
           search={search}
           status={status}
           type={type}
+          sortBy={sort}
           onSearchChange={handleSearchChange}
           onStatusChange={handleStatusChange}
           onTypeChange={handleTypeChange}
+          onSortChange={handleSortChange}
         />
 
         <div className="flex items-center gap-1 bg-parchment rounded-xl p-1">
@@ -59,9 +77,7 @@ export function ProjectsList() {
             onClick={() => setViewMode("grid")}
             className={cn(
               "p-2 rounded-lg transition-colors",
-              viewMode === "grid"
-                ? "bg-paper text-ink shadow-sm"
-                : "text-stone hover:text-ink",
+              viewMode === "grid" ? "bg-paper text-ink shadow-sm" : "text-stone hover:text-ink",
             )}
             aria-label="Grid view"
           >
@@ -71,9 +87,7 @@ export function ProjectsList() {
             onClick={() => setViewMode("table")}
             className={cn(
               "p-2 rounded-lg transition-colors",
-              viewMode === "table"
-                ? "bg-paper text-ink shadow-sm"
-                : "text-stone hover:text-ink",
+              viewMode === "table" ? "bg-paper text-ink shadow-sm" : "text-stone hover:text-ink",
             )}
             aria-label="Table view"
           >

@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { InvoiceStatus } from "@prisma/client";
+import { sendEmail } from "@/lib/email/send";
+import {
+  paymentReminderSubject,
+  paymentReminderHtml,
+} from "@/lib/email/templates/payment-reminder";
+import { overdueNoticeSubject, overdueNoticeHtml } from "@/lib/email/templates/overdue-notice";
+import { formatMoney, formatDate } from "@/lib/utils";
 
 /**
  * GET /api/cron/payment-reminders
  *
- * Cron job to identify invoices due soon or recently overdue.
- * In production, this would trigger email reminders via Resend.
+ * Cron job to identify invoices due soon or recently overdue
+ * and send email reminders via Resend.
  * Runs weekly via Vercel Cron.
  */
 export async function GET(request: NextRequest) {
@@ -32,6 +39,7 @@ export async function GET(request: NextRequest) {
         lte: sevenDaysFromNow,
       },
       balanceDueCents: { gt: 0 },
+      clientEmail: { not: null },
       deletedAt: null,
     },
     select: {
@@ -41,7 +49,7 @@ export async function GET(request: NextRequest) {
       clientEmail: true,
       dueDate: true,
       balanceDueCents: true,
-      project: { select: { name: true } },
+      organizationId: true,
     },
   });
 
@@ -57,6 +65,7 @@ export async function GET(request: NextRequest) {
         lt: now,
       },
       balanceDueCents: { gt: 0 },
+      clientEmail: { not: null },
       deletedAt: null,
     },
     select: {
@@ -66,17 +75,70 @@ export async function GET(request: NextRequest) {
       clientEmail: true,
       dueDate: true,
       balanceDueCents: true,
-      project: { select: { name: true } },
+      organizationId: true,
     },
   });
 
-  // In production, send email reminders via Resend here
-  // For now, just return the counts
+  // Collect unique org IDs and fetch their names
+  const orgIds = new Set([
+    ...dueSoon.map((i) => i.organizationId),
+    ...recentlyOverdue.map((i) => i.organizationId),
+  ]);
+  const orgs = await prisma.organization.findMany({
+    where: { id: { in: [...orgIds] } },
+    select: { id: true, name: true },
+  });
+  const orgMap = new Map(orgs.map((o) => [o.id, o.name]));
+
+  let remindersSent = 0;
+  let overduesSent = 0;
+
+  // Send payment reminders for invoices due soon
+  for (const inv of dueSoon) {
+    if (!inv.clientEmail) continue;
+    const orgName = orgMap.get(inv.organizationId) ?? "CreativeFlow";
+    const emailData = {
+      clientName: inv.clientName,
+      invoiceNumber: inv.invoiceNumber,
+      balanceFormatted: formatMoney(inv.balanceDueCents),
+      dueDate: formatDate(inv.dueDate),
+      orgName,
+    };
+    const sent = await sendEmail({
+      to: inv.clientEmail,
+      subject: paymentReminderSubject(emailData),
+      html: paymentReminderHtml(emailData),
+    });
+    if (sent) remindersSent++;
+  }
+
+  // Send overdue notices
+  for (const inv of recentlyOverdue) {
+    if (!inv.clientEmail) continue;
+    const orgName = orgMap.get(inv.organizationId) ?? "CreativeFlow";
+    const daysOverdue = Math.ceil((now.getTime() - inv.dueDate.getTime()) / (1000 * 60 * 60 * 24));
+    const emailData = {
+      clientName: inv.clientName,
+      invoiceNumber: inv.invoiceNumber,
+      balanceFormatted: formatMoney(inv.balanceDueCents),
+      dueDate: formatDate(inv.dueDate),
+      daysOverdue,
+      orgName,
+    };
+    const sent = await sendEmail({
+      to: inv.clientEmail,
+      subject: overdueNoticeSubject(emailData),
+      html: overdueNoticeHtml(emailData),
+    });
+    if (sent) overduesSent++;
+  }
 
   return NextResponse.json({
     success: true,
     dueSoon: dueSoon.length,
     recentlyOverdue: recentlyOverdue.length,
+    remindersSent,
+    overduesSent,
     timestamp: now.toISOString(),
   });
 }

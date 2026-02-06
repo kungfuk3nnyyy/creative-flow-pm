@@ -14,11 +14,16 @@ export async function GET(request: NextRequest) {
     throw error;
   }
 
-  const projectId = request.nextUrl.searchParams.get("projectId") ?? undefined;
+  const { searchParams } = request.nextUrl;
+  const projectId = searchParams.get("projectId") ?? undefined;
+  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
+  const pageSize = Math.min(100, Math.max(1, parseInt(searchParams.get("pageSize") ?? "20", 10)));
 
-  const profitability = await calculateProjectProfitability({
+  const { projects: profitability, total } = await calculateProjectProfitability({
     organizationId: user.organizationId,
     projectId,
+    page,
+    pageSize,
   });
 
   // Summary totals
@@ -27,7 +32,7 @@ export async function GET(request: NextRequest) {
     totalReceivedCents: profitability.reduce((s, p) => s + (p.receivedCents as number), 0),
     totalExpensesCents: profitability.reduce((s, p) => s + (p.expensesCents as number), 0),
     totalProfitCents: profitability.reduce((s, p) => s + (p.profitCents as number), 0),
-    projectCount: profitability.length,
+    projectCount: total,
   };
 
   const avgMarginBp =
@@ -38,5 +43,11 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     projects: profitability,
     summary: { ...summary, avgMarginBasisPoints: avgMarginBp },
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
   });
 }
