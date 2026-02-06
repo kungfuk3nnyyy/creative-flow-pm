@@ -5,18 +5,11 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations/auth";
-import type { UserRole } from "@prisma/client";
+import { authConfig } from "@/lib/auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(prisma) as any,
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
   providers: [
     Credentials({
       name: "credentials",
@@ -70,22 +63,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id!;
-        token.organizationId = (user as { organizationId: string }).organizationId;
-        token.role = (user as { role: UserRole }).role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.organizationId = token.organizationId as string;
-        session.user.role = token.role as UserRole;
-      }
-      return session;
-    },
+    ...authConfig.callbacks,
     async signIn({ user, account }) {
       // For OAuth providers, ensure user has an organization
       if (account?.provider === "google" && user.email) {
@@ -93,8 +71,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: user.email },
         });
         if (!existingUser) {
-          // OAuth users without an existing account cannot sign in
-          // They must be invited or register with credentials first
           return false;
         }
         if (!existingUser.isActive) {

@@ -1,11 +1,17 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
+import { authConfig } from "@/lib/auth.config";
 
 /**
  * Route protection middleware.
+ * Uses the edge-safe auth config (no Prisma/bcrypt) to stay under
+ * the Vercel Edge Function size limit.
+ *
  * - Public routes: /login, /register, /forgot-password, /api/auth
  * - All other routes require authentication
  */
+const { auth } = NextAuth(authConfig);
+
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
