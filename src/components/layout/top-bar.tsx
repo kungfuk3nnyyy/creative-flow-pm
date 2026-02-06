@@ -27,7 +27,7 @@ export function TopBar() {
       <div className="flex items-center gap-4">
         <button
           onClick={toggleMobileMenu}
-          className="lg:hidden p-2 rounded-lg text-slate hover:bg-linen transition-colors"
+          className="lg:hidden p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate hover:bg-linen transition-colors"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
@@ -40,7 +40,7 @@ export function TopBar() {
         {/* Search trigger */}
         <button
           onClick={openCommandPalette}
-          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-stone hover:bg-linen transition-colors"
+          className="flex items-center gap-3 px-3 py-2 min-h-[44px] rounded-xl text-sm text-stone hover:bg-linen transition-colors"
         >
           <Search className="w-4 h-4" />
           <span className="hidden sm:inline">Search...</span>
@@ -52,10 +52,10 @@ export function TopBar() {
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2.5 rounded-xl text-slate hover:bg-linen hover:text-ink transition-colors"
+          className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate hover:bg-linen hover:text-ink transition-colors"
           aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
         >
-          {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          {theme === "light" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
         </button>
       </div>
     </header>

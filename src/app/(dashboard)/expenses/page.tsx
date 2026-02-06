@@ -47,17 +47,17 @@ export default function AllExpensesPage() {
         title="Expenses"
         description="All expenses across projects."
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <a
               href={`/api/exports/expenses${filters.status ? `?status=${filters.status}` : ""}`}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-paper border border-stone/20 text-ink hover:bg-linen transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-paper border border-stone/20 text-ink hover:bg-linen transition-colors"
             >
               <Download className="w-4 h-4" />
               Export CSV
             </a>
             <Link
               href="/projects"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-ink text-paper hover:bg-charcoal transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-ink text-paper hover:bg-charcoal transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add Expense
@@ -125,54 +125,106 @@ export default function AllExpensesPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-stone/10">
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Description
-                    </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Project
-                    </th>
-                    <th className="text-right text-label text-slate px-3 py-2 font-medium">
-                      Amount
-                    </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">Date</th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Category
-                    </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Submitted By
-                    </th>
-                    <th className="text-center text-label text-slate px-3 py-2 font-medium">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expenses.map((expense) => (
-                    <ExpenseRow key={expense.id} expense={expense} />
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t border-stone/10">
-                    <td className="px-3 py-3 text-sm font-medium text-ink">
-                      Total ({pagination?.total ?? expenses.length} expenses)
-                    </td>
-                    <td />
-                    <td className="px-3 py-3 text-right text-sm font-mono font-medium text-ink">
-                      {formatCents(totalAmount)}
-                    </td>
-                    <td colSpan={4} />
-                  </tr>
-                </tfoot>
-              </table>
+        <>
+          {/* Mobile card view */}
+          <div className="sm:hidden space-y-3">
+            {expenses.map((expense) => (
+              <div
+                key={expense.id}
+                className="bg-paper rounded-xl border border-stone/10 p-4 space-y-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-ink">{expense.description}</p>
+                    {expense.vendor && (
+                      <p className="text-sm text-stone mt-0.5">via {expense.vendor.name}</p>
+                    )}
+                  </div>
+                  <StatusBadge
+                    label={EXPENSE_STATUS_LABELS[expense.status] ?? expense.status}
+                    variant={getExpenseStatusVariant(expense.status)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={`/projects/${expense.project.id}/expenses`}
+                    className="text-sm text-terracotta-600 hover:text-terracotta-700"
+                  >
+                    {expense.project.name}
+                  </Link>
+                  <span className="text-sm font-mono font-medium text-ink">
+                    {formatCents(expense.amountCents)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-slate">
+                  <span>
+                    {new Date(expense.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <span>{expense.submittedBy.name ?? "Unknown"}</span>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-1 py-2 text-sm font-medium text-ink">
+              <span>Total ({pagination?.total ?? expenses.length} expenses)</span>
+              <span className="font-mono">{formatCents(totalAmount)}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Desktop table view */}
+          <Card className="hidden sm:block">
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-stone/10">
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Description
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Project
+                      </th>
+                      <th className="text-right text-label text-slate px-3 py-2 font-medium">
+                        Amount
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Date
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Category
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Submitted By
+                      </th>
+                      <th className="text-center text-label text-slate px-3 py-2 font-medium">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expenses.map((expense) => (
+                      <ExpenseRow key={expense.id} expense={expense} />
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-stone/10">
+                      <td className="px-3 py-3 text-sm font-medium text-ink">
+                        Total ({pagination?.total ?? expenses.length} expenses)
+                      </td>
+                      <td />
+                      <td className="px-3 py-3 text-right text-sm font-mono font-medium text-ink">
+                        {formatCents(totalAmount)}
+                      </td>
+                      <td colSpan={4} />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {pagination && pagination.totalPages > 1 && (

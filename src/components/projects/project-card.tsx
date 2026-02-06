@@ -19,7 +19,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
             <h3
-              className="text-h4 text-ink truncate group-hover:text-terracotta-500 transition-colors"
+              className="text-h4 text-ink line-clamp-2 md:truncate group-hover:text-terracotta-500 transition-colors"
               title={project.name}
             >
               {project.name}

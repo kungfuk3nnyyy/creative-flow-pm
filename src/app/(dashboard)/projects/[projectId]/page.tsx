@@ -99,9 +99,9 @@ export default async function ProjectOverviewPage({
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 mt-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
       {/* Main Content - 8 cols */}
-      <div className="xl:col-span-8 space-y-6">
+      <div className="lg:col-span-8 space-y-6">
         {/* Description */}
         <Card>
           <CardHeader>
@@ -133,7 +133,7 @@ export default async function ProjectOverviewPage({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <FinancialItem label="Budget" value={formatCents(financials.budgetTotal)} />
               <FinancialItem
                 label="Expenses (Approved)"
@@ -198,7 +198,7 @@ export default async function ProjectOverviewPage({
       </div>
 
       {/* Sidebar - 4 cols */}
-      <div className="xl:col-span-4 space-y-6">
+      <div className="lg:col-span-4 space-y-6">
         {/* Project Details */}
         <Card>
           <CardHeader>

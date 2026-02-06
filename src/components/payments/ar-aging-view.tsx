@@ -96,7 +96,7 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
                     <div className={cn("w-2.5 h-2.5 rounded-sm", BUCKET_BAR_COLORS[i])} />
                     <span
                       className={cn(
-                        "text-xs",
+                        "text-sm sm:text-xs",
                         (bucket.totalCents as number) > 0 ? "text-ink" : "text-stone",
                       )}
                     >
@@ -109,7 +109,7 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
           )}
 
           {/* Bucket cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {aging.buckets.map((bucket, i) => {
               const hasMoney = (bucket.totalCents as number) > 0;
               return (
@@ -121,7 +121,7 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
                     hasMoney ? "bg-linen" : "bg-paper border border-stone/10 opacity-60",
                   )}
                 >
-                  <p className="text-xs font-medium text-slate">{bucket.label}</p>
+                  <p className="text-sm sm:text-xs font-medium text-slate">{bucket.label}</p>
                   <p
                     className={cn(
                       "text-base font-mono font-semibold mt-1",
@@ -130,7 +130,7 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
                   >
                     {hasMoney ? formatCents(bucket.totalCents as number) : "--"}
                   </p>
-                  <p className="text-xs text-stone mt-1">
+                  <p className="text-sm sm:text-xs text-stone mt-1">
                     {bucket.invoiceCount} invoice{bucket.invoiceCount !== 1 ? "s" : ""}
                   </p>
                   {hasMoney && totalOutstanding > 0 && (
@@ -156,7 +156,53 @@ export function ArAgingView({ projectId }: ArAgingViewProps) {
             </span>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            {/* Mobile card view */}
+            <div className="sm:hidden space-y-3">
+              {invoices.map((inv) => (
+                <div
+                  key={inv.id}
+                  className={cn(
+                    "rounded-xl border border-stone/10 p-4 space-y-2",
+                    inv.daysOverdue > 90 && "bg-error-soft/20 border-error/20",
+                    inv.daysOverdue > 60 &&
+                      inv.daysOverdue <= 90 &&
+                      "bg-terracotta-50/30 border-terracotta-200",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-mono font-medium text-ink">{inv.invoiceNumber}</p>
+                      <p className="text-sm text-slate mt-0.5">{inv.clientName}</p>
+                    </div>
+                    <StatusBadge
+                      label={INVOICE_STATUS_LABELS[inv.status] ?? inv.status}
+                      variant={getInvoiceStatusVariant(inv.status)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate">
+                      Due:{" "}
+                      {new Date(inv.dueDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                    {inv.daysOverdue > 0 && (
+                      <span className="text-error font-medium">{inv.daysOverdue} days overdue</span>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    {!projectId && <span className="text-sm text-slate">{inv.project.name}</span>}
+                    <span className="text-sm font-mono font-medium text-ink ml-auto">
+                      {formatCents(inv.balanceDueCents)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table view */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-stone/10">

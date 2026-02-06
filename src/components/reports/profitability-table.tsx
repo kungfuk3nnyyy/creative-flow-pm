@@ -28,31 +28,33 @@ export function ProfitabilityTable() {
     <div className="space-y-6">
       {/* Summary */}
       {summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Projects</p>
-            <p className="text-lg font-semibold text-ink mt-1">{summary.projectCount}</p>
+            <p className="text-sm sm:text-xs font-medium text-slate">Projects</p>
+            <p className="text-base sm:text-lg font-semibold text-ink mt-1">
+              {summary.projectCount}
+            </p>
           </div>
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Total Invoiced</p>
-            <p className="text-lg font-mono font-semibold text-ink mt-1">
+            <p className="text-sm sm:text-xs font-medium text-slate">Total Invoiced</p>
+            <p className="text-base sm:text-lg font-mono font-semibold text-ink mt-1">
               {formatCents(summary.totalInvoicedCents)}
             </p>
           </div>
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Total Received</p>
-            <p className="text-lg font-mono font-semibold text-ink mt-1">
+            <p className="text-sm sm:text-xs font-medium text-slate">Total Received</p>
+            <p className="text-base sm:text-lg font-mono font-semibold text-ink mt-1">
               {formatCents(summary.totalReceivedCents)}
             </p>
           </div>
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Total Expenses</p>
-            <p className="text-lg font-mono font-semibold text-ink mt-1">
+            <p className="text-sm sm:text-xs font-medium text-slate">Total Expenses</p>
+            <p className="text-base sm:text-lg font-mono font-semibold text-ink mt-1">
               {formatCents(summary.totalExpensesCents)}
             </p>
           </div>
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Avg Margin</p>
+            <p className="text-sm sm:text-xs font-medium text-slate">Avg Margin</p>
             <p
               className={cn(
                 "text-lg font-mono font-semibold mt-1",

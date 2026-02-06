@@ -122,7 +122,7 @@ export function PnlReport() {
       ) : report ? (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SummaryCard
               label={basis === "accrual" ? "Revenue (Invoiced)" : "Revenue (Received)"}
               value={formatCents(
@@ -283,10 +283,10 @@ function SummaryCard({
 }) {
   return (
     <div className="bg-linen rounded-xl p-4">
-      <p className="text-xs font-medium text-slate">{label}</p>
+      <p className="text-sm sm:text-xs font-medium text-slate">{label}</p>
       <p
         className={cn(
-          "text-lg font-mono font-semibold mt-1",
+          "text-base sm:text-lg font-mono font-semibold mt-1",
           variant === "positive" && "text-success",
           variant === "negative" && "text-error",
           variant === "default" && "text-ink",

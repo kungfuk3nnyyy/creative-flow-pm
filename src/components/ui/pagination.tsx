@@ -11,13 +11,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export function Pagination({
-  page,
-  totalPages,
-  total,
-  perPage,
-  onPageChange,
-}: PaginationProps) {
+export function Pagination({ page, totalPages, total, perPage, onPageChange }: PaginationProps) {
   const start = (page - 1) * perPage + 1;
   const end = Math.min(page * perPage, total);
 
@@ -34,7 +28,7 @@ export function Pagination({
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
           className={cn(
-            "p-2 rounded-lg text-sm transition-colors",
+            "p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-sm transition-colors",
             page <= 1
               ? "text-stone/40 cursor-not-allowed"
               : "text-slate hover:bg-linen hover:text-ink",
@@ -54,10 +48,8 @@ export function Pagination({
               key={p}
               onClick={() => onPageChange(p)}
               className={cn(
-                "w-9 h-9 rounded-lg text-sm font-medium transition-colors",
-                p === page
-                  ? "bg-ink text-paper"
-                  : "text-slate hover:bg-linen hover:text-ink",
+                "w-10 h-10 sm:w-9 sm:h-9 rounded-lg text-sm font-medium transition-colors",
+                p === page ? "bg-ink text-paper" : "text-slate hover:bg-linen hover:text-ink",
               )}
               aria-current={p === page ? "page" : undefined}
             >
@@ -70,7 +62,7 @@ export function Pagination({
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
           className={cn(
-            "p-2 rounded-lg text-sm transition-colors",
+            "p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-sm transition-colors",
             page >= totalPages
               ? "text-stone/40 cursor-not-allowed"
               : "text-slate hover:bg-linen hover:text-ink",
@@ -84,10 +76,7 @@ export function Pagination({
   );
 }
 
-function generatePageNumbers(
-  current: number,
-  total: number,
-): (number | null)[] {
+function generatePageNumbers(current: number, total: number): (number | null)[] {
   if (total <= 7) {
     return Array.from({ length: total }, (_, i) => i + 1);
   }

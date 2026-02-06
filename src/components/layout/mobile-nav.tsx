@@ -75,10 +75,10 @@ export function MobileNav() {
           <span className="text-h3 text-ink font-display">CreativeFlow</span>
           <button
             onClick={close}
-            className="p-2 rounded-lg text-stone hover:bg-linen hover:text-ink transition-colors"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-stone hover:bg-linen hover:text-ink transition-colors"
             aria-label="Close navigation menu"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

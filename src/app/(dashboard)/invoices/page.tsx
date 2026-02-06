@@ -51,17 +51,17 @@ export default function AllInvoicesPage() {
         title="Invoices"
         description="All invoices across projects."
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <a
               href={`/api/exports/invoices${filters.status ? `?status=${filters.status}` : ""}`}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-paper border border-stone/20 text-ink hover:bg-linen transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-paper border border-stone/20 text-ink hover:bg-linen transition-colors"
             >
               <Download className="w-4 h-4" />
               Export CSV
             </a>
             <Link
               href="/projects"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-ink text-paper hover:bg-charcoal transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium bg-ink text-paper hover:bg-charcoal transition-colors"
             >
               <Plus className="w-4 h-4" />
               Create Invoice
@@ -110,22 +110,22 @@ export default function AllInvoicesPage() {
 
       {/* Summary Cards */}
       {!isLoading && invoices.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Total Invoiced</p>
-            <p className="text-lg font-mono font-semibold text-ink mt-1">
+            <p className="text-sm sm:text-xs font-medium text-slate">Total Invoiced</p>
+            <p className="text-base sm:text-lg font-mono font-semibold text-ink mt-1">
               {formatCents(totalInvoiced)}
             </p>
           </div>
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Outstanding</p>
-            <p className="text-lg font-mono font-semibold text-ink mt-1">
+            <p className="text-sm sm:text-xs font-medium text-slate">Outstanding</p>
+            <p className="text-base sm:text-lg font-mono font-semibold text-ink mt-1">
               {formatCents(totalOutstanding)}
             </p>
           </div>
           <div className="bg-linen rounded-xl p-4">
-            <p className="text-xs font-medium text-slate">Invoice Count</p>
-            <p className="text-lg font-semibold text-ink mt-1">
+            <p className="text-sm sm:text-xs font-medium text-slate">Invoice Count</p>
+            <p className="text-base sm:text-lg font-semibold text-ink mt-1">
               {pagination?.total ?? invoices.length}
             </p>
           </div>
@@ -153,45 +153,95 @@ export default function AllInvoicesPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-stone/10">
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium w-8" />
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Invoice
-                    </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Project
-                    </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">
-                      Client
-                    </th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">Date</th>
-                    <th className="text-left text-label text-slate px-3 py-2 font-medium">Due</th>
-                    <th className="text-right text-label text-slate px-3 py-2 font-medium">
-                      Total
-                    </th>
-                    <th className="text-right text-label text-slate px-3 py-2 font-medium">
-                      Balance
-                    </th>
-                    <th className="text-center text-label text-slate px-3 py-2 font-medium">
-                      Status
-                    </th>
-                    <th className="text-center text-label text-slate px-3 py-2 font-medium w-12" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoices.map((invoice) => (
-                    <InvoiceRow key={invoice.id} invoice={invoice} />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        <>
+          {/* Mobile card view */}
+          <div className="sm:hidden space-y-3">
+            {invoices.map((invoice) => (
+              <div
+                key={invoice.id}
+                className="bg-paper rounded-xl border border-stone/10 p-4 space-y-2"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-mono font-medium text-ink">
+                      {invoice.invoiceNumber}
+                    </p>
+                    <p className="text-sm text-slate mt-0.5">{invoice.clientName}</p>
+                  </div>
+                  <StatusBadge
+                    label={INVOICE_STATUS_LABELS[invoice.status] ?? invoice.status}
+                    variant={getInvoiceStatusVariant(invoice.status)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={`/projects/${invoice.project.id}/invoices`}
+                    className="text-sm text-terracotta-600 hover:text-terracotta-700"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {invoice.project.name}
+                  </Link>
+                  <span className="text-sm font-mono font-medium text-ink">
+                    {formatCents(invoice.totalCents)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-slate">
+                  <span>
+                    Due:{" "}
+                    {new Date(invoice.dueDate).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <span>Balance: {formatCents(invoice.balanceDueCents)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table view */}
+          <Card className="hidden sm:block">
+            <CardContent className="pt-6">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-stone/10">
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium w-8" />
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Invoice
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Project
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Client
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">
+                        Date
+                      </th>
+                      <th className="text-left text-label text-slate px-3 py-2 font-medium">Due</th>
+                      <th className="text-right text-label text-slate px-3 py-2 font-medium">
+                        Total
+                      </th>
+                      <th className="text-right text-label text-slate px-3 py-2 font-medium">
+                        Balance
+                      </th>
+                      <th className="text-center text-label text-slate px-3 py-2 font-medium">
+                        Status
+                      </th>
+                      <th className="text-center text-label text-slate px-3 py-2 font-medium w-12" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invoices.map((invoice) => (
+                      <InvoiceRow key={invoice.id} invoice={invoice} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {pagination && pagination.totalPages > 1 && (

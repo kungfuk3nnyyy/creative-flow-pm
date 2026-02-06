@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Main content area */}
         <main className="lg:ml-64 transition-all duration-300">
           <TopBar />
-          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+          <div className="p-4 sm:p-6 lg:p-8 overflow-x-hidden">{children}</div>
         </main>
 
         <MobileNav />

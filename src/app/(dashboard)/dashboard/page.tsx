@@ -79,7 +79,7 @@ export default function DashboardPage() {
       />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {isLoading ? (
           <>
             <KPICardSkeleton />
@@ -161,9 +161,9 @@ export default function DashboardPage() {
       )}
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Active Projects - 8 cols */}
-        <div className="xl:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Active Projects</CardTitle>
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-stone">
+                      <div className="flex items-center gap-2 sm:gap-4 text-xs text-stone flex-wrap">
                         <span>{project._count.milestones} milestones</span>
                         <span>{project._count.expenses} expenses</span>
                         <span>{project._count.invoices} invoices</span>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
                           </span>
                           <span className="text-sm text-slate ml-2">{inv.clientName}</span>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
                           <span className="text-xs text-error font-medium">
                             {daysOverdue} days overdue
                           </span>
@@ -351,7 +351,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Sidebar - 4 cols */}
-        <div className="xl:col-span-4 space-y-6">
+        <div className="lg:col-span-4 space-y-6">
           {/* Quick Links */}
           <Card>
             <CardHeader>

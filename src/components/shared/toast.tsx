@@ -42,7 +42,7 @@ export function ToastContainer() {
 
   return (
     <div
-      className="fixed bottom-6 right-6 z-notification space-y-2 max-w-sm w-full pointer-events-none"
+      className="fixed bottom-6 right-4 sm:right-6 z-notification space-y-2 max-w-[calc(100vw-2rem)] sm:max-w-sm w-full pointer-events-none"
       aria-live="polite"
       aria-relevant="additions"
     >
