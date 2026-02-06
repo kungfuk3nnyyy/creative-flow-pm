@@ -1,0 +1,352 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────
+   Atelier Design System - CSS Custom Properties
+   ────────────────────────────────────── */
+
+:root {
+  /* Core Brand */
+  --ink: #1a1a2e;
+  --charcoal: #2d2d44;
+  --slate: #4a4a68;
+  --stone: #6b6b8a;
+
+  /* Warm Neutrals */
+  --canvas: #fafaf8;
+  --paper: #ffffff;
+  --linen: #f5f5f2;
+  --parchment: #eeeee8;
+
+  /* Terracotta Accent */
+  --terracotta-50: #fdf6f3;
+  --terracotta-100: #fae8e0;
+  --terracotta-200: #f5cfc0;
+  --terracotta-300: #eeab94;
+  --terracotta-400: #e58361;
+  --terracotta-500: #d96941;
+  --terracotta-600: #c85436;
+  --terracotta-700: #a6432d;
+  --terracotta-800: #873a2b;
+  --terracotta-900: #6e3328;
+
+  /* Sage Accent */
+  --sage-50: #f6f7f4;
+  --sage-100: #e8ebe3;
+  --sage-200: #d1d8c8;
+  --sage-300: #b3bea4;
+  --sage-400: #94a37f;
+  --sage-500: #778762;
+  --sage-600: #5d6b4d;
+  --sage-700: #4a5540;
+  --sage-800: #3d4536;
+  --sage-900: #343b2f;
+
+  /* Semantic Colors */
+  --success: #4a9c6d;
+  --success-soft: #e8f5ed;
+  --warning: #d4a03a;
+  --warning-soft: #fef8e7;
+  --error: #c75450;
+  --error-soft: #fdf0ef;
+  --info: #5b8ec9;
+  --info-soft: #eff5fc;
+
+  /* Typography */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-heading: "Inter", -apple-system, sans-serif;
+  --font-body: "Inter", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4rem;
+  --space-12: 6rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.04), 0 6px 16px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.08), 0 20px 40px rgba(0, 0, 0, 0.08);
+  --shadow-warm-sm: 0 1px 2px rgba(229, 131, 97, 0.06);
+  --shadow-warm-md: 0 1px 3px rgba(229, 131, 97, 0.06),
+    0 6px 16px rgba(229, 131, 97, 0.06);
+  --shadow-warm-lg: 0 2px 8px rgba(229, 131, 97, 0.08),
+    0 12px 24px rgba(229, 131, 97, 0.08);
+
+  /* Z-Index Scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-notification: 700;
+  --z-command-palette: 800;
+
+  /* Breakpoints (for reference - Tailwind handles these) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
+  /* Chart Colors */
+  --chart-1: #e58361;
+  --chart-2: #94a37f;
+  --chart-3: #5b8ec9;
+  --chart-4: #d4a03a;
+  --chart-5: #c75450;
+  --chart-6: #8b6fc0;
+  --chart-7: #4a9c6d;
+  --chart-8: #d4836f;
+
+  /* Animation */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Focus */
+  --focus-ring: var(--terracotta-400);
+  --focus-ring-offset: var(--paper);
+}
+
+/* ──────────────────────────────────────
+   Dark Mode - "Gallery After Hours"
+   ────────────────────────────────────── */
+
+[data-theme="dark"] {
+  --canvas: #121218;
+  --paper: #1a1a24;
+  --linen: #222230;
+  --parchment: #2a2a3a;
+
+  --ink: #f5f5f2;
+  --charcoal: #d4d4d0;
+  --slate: #a8a8a4;
+  --stone: #7c7c78;
+
+  --terracotta-50: #2a1f1a;
+  --terracotta-100: #3d2a1f;
+  --terracotta-200: #5c3a28;
+  --terracotta-300: #8b5438;
+  --terracotta-400: #e58361;
+  --terracotta-500: #f09878;
+  --terracotta-600: #f5b09a;
+  --terracotta-700: #f8c8b8;
+  --terracotta-800: #fbe0d6;
+  --terracotta-900: #fdf0eb;
+
+  --sage-50: #1a1f18;
+  --sage-100: #242c20;
+  --sage-200: #344030;
+  --sage-300: #4d5f44;
+  --sage-400: #94a37f;
+  --sage-500: #a8b697;
+  --sage-600: #bcc9af;
+  --sage-700: #d0dcc7;
+  --sage-800: #e4ebdf;
+  --sage-900: #f2f5ef;
+
+  --success: #5ab87e;
+  --success-soft: #1a2e22;
+  --warning: #e0b04a;
+  --warning-soft: #2e2a1a;
+  --error: #e06b67;
+  --error-soft: #2e1a1a;
+  --info: #6ea0d8;
+  --info-soft: #1a222e;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.2), 0 6px 16px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.25), 0 12px 24px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.25);
+  --shadow-warm-sm: 0 1px 2px rgba(229, 131, 97, 0.1);
+  --shadow-warm-md: 0 1px 3px rgba(229, 131, 97, 0.1),
+    0 6px 16px rgba(229, 131, 97, 0.08);
+  --shadow-warm-lg: 0 2px 8px rgba(229, 131, 97, 0.12),
+    0 12px 24px rgba(229, 131, 97, 0.1);
+
+  --chart-1: #f09878;
+  --chart-2: #a8b697;
+  --chart-3: #6ea0d8;
+  --chart-4: #e0b04a;
+  --chart-5: #e06b67;
+  --chart-6: #a48dd4;
+  --chart-7: #5ab87e;
+  --chart-8: #e0a090;
+
+  --focus-ring: var(--terracotta-400);
+  --focus-ring-offset: var(--canvas);
+}
+
+/* ──────────────────────────────────────
+   Base Styles
+   ────────────────────────────────────── */
+
+@layer base {
+  * {
+    border-color: color-mix(in srgb, var(--stone) 10%, transparent);
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* ──────────────────────────────────────
+   Typography Utilities
+   ────────────────────────────────────── */
+
+@layer utilities {
+  .text-display-xl {
+    font: 600 3.5rem/1.1 var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .text-display-lg {
+    font: 600 2.5rem/1.15 var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .text-h1 {
+    font: 600 1.875rem/1.2 var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+
+  .text-h2 {
+    font: 600 1.5rem/1.25 var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+
+  .text-h3 {
+    font: 600 1.25rem/1.3 var(--font-heading);
+  }
+
+  .text-h4 {
+    font: 600 1.125rem/1.4 var(--font-heading);
+  }
+
+  .text-body-lg {
+    font: 400 1.125rem/1.6 var(--font-body);
+  }
+
+  .text-body {
+    font: 400 1rem/1.6 var(--font-body);
+  }
+
+  .text-body-sm {
+    font: 400 0.875rem/1.5 var(--font-body);
+  }
+
+  .text-label {
+    font: 500 0.75rem/1.4 var(--font-body);
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+  }
+
+  .text-caption {
+    font: 400 0.75rem/1.4 var(--font-body);
+    color: var(--stone);
+  }
+
+  .text-number {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-currency {
+    font: 500 1rem/1 var(--font-mono);
+  }
+
+  .text-currency-lg {
+    font: 600 1.5rem/1 var(--font-mono);
+  }
+}
+
+/* ──────────────────────────────────────
+   Component Utilities
+   ────────────────────────────────────── */
+
+@layer utilities {
+  .focus-ring {
+    @apply outline-none;
+  }
+
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--linen) 25%,
+      var(--parchment) 50%,
+      var(--linen) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* ──────────────────────────────────────
+   Print Styles
+   ────────────────────────────────────── */
+
+@media print {
+  :root {
+    --canvas: #ffffff;
+    --paper: #ffffff;
+    --linen: #f5f5f5;
+    --parchment: #eeeeee;
+    --ink: #000000;
+    --charcoal: #333333;
+    --slate: #666666;
+    --stone: #999999;
+  }
+
+  .no-print,
+  nav,
+  aside,
+  .sidebar,
+  .top-bar,
+  .toast-container {
+    display: none !important;
+  }
+
+  * {
+    box-shadow: none !important;
+  }
+
+  table {
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+}
